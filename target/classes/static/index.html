@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JavaJudge &mdash; Sandbox &amp; Online Judge (Java &amp; C++)</title>
+    <!-- Modern Typography: Inter & Fira Code -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome 6 Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- Top Modern App Navigation Header -->
+    <header class="app-header">
+        <div class="header-left">
+            <div class="brand" title="JavaJudge Online Sandbox">
+                <i class="fa-solid fa-terminal brand-icon"></i>
+                <span class="brand-name">Java<span class="brand-accent">Judge</span></span>
+                <span class="version-tag" id="compiler-version-tag">JDK 21 / GCC 16</span>
+            </div>
+
+            <!-- Problem Selector / Mode Picker -->
+            <div class="problem-selector-wrapper">
+                <i class="fa-solid fa-list-check selector-icon"></i>
+                <select id="problem-select" class="clean-select" aria-label="Select Problem">
+                    <!-- Populated dynamically via /api/problems -->
+                    <option value="two-sum">1. Two Sum</option>
+                    <option value="valid-parentheses">2. Valid Parentheses</option>
+                    <option value="palindrome-number">3. Palindrome Number</option>
+                    <option value="maximum-subarray">4. Maximum Subarray</option>
+                    <option value="climbing-stairs">5. Climbing Stairs</option>
+                    <option value="__playground__">Playground (Scratchpad)</option>
+                </select>
+                <span id="problem-difficulty-badge" class="difficulty-pill easy">Easy</span>
+            </div>
+
+            <!-- Language Selector (Java & C++) -->
+            <div class="language-selector-wrapper">
+                <i class="fa-solid fa-code selector-icon"></i>
+                <select id="language-select" class="clean-select" aria-label="Select Programming Language">
+                    <option value="java">Java 21</option>
+                    <option value="cpp">C++ 20</option>
+                </select>
+            </div>
+
+            <!-- Playground Preset Code Templates Dropdown (Only in Playground mode) -->
+            <div id="playground-template-wrapper" class="template-selector hidden">
+                <select id="template-select" class="clean-select" aria-label="Load Code Template">
+                    <!-- Populated by JS based on active language -->
+                </select>
+            </div>
+        </div>
+
+        <div class="header-right">
+            <!-- Mode Toggle: Problem Solving vs Freeform Scratchpad -->
+            <div class="mode-switch-group">
+                <button id="btn-mode-judge" class="mode-tab-btn active" title="Online Judge Problem Solving">
+                    <i class="fa-solid fa-code"></i> Problem
+                </button>
+                <button id="btn-mode-playground" class="mode-tab-btn" title="Arbitrary Freeform Online Compiler">
+                    <i class="fa-solid fa-terminal"></i> Playground
+                </button>
+            </div>
+
+            <!-- Execution Action Buttons -->
+            <div class="action-btn-group">
+                <!-- Run Code (Sample Tests or Playground Run) -->
+                <button id="btn-run-code" class="btn-action btn-run-secondary" title="Run Sample Testcases (Ctrl + Enter)">
+                    <i class="fa-solid fa-play"></i>
+                    <span>Run</span>
+                    <kbd class="shortcut-kbd">Ctrl+Enter</kbd>
+                </button>
+
+                <!-- Submit Button (Full Hidden Suite) -->
+                <button id="btn-submit" class="btn-action btn-submit-main" title="Submit Solution (Ctrl + Shift + Enter)">
+                    <i class="fa-solid fa-cloud-arrow-up"></i>
+                    <span>Submit</span>
+                    <kbd class="shortcut-kbd">Ctrl+Shift+Enter</kbd>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Resizable Split Workbench -->
+    <main class="workbench">
+        <!-- 1. LEFT PANE: Problem Statement & Details -->
+        <section class="problem-pane" id="problem-pane">
+            <div class="pane-header problem-header">
+                <div class="problem-header-meta">
+                    <button id="btn-prev-problem" class="btn-icon btn-nav-problem" title="Previous Problem">
+                        <i class="fa-solid fa-chevron-left"></i>
+                    </button>
+                    <span id="problem-num-title" class="problem-title-text">1. Two Sum</span>
+                    <button id="btn-next-problem" class="btn-icon btn-nav-problem" title="Next Problem">
+                        <i class="fa-solid fa-chevron-right"></i>
+                    </button>
+                    <span id="problem-pane-difficulty" class="difficulty-pill easy">Easy</span>
+                </div>
+                <div class="problem-header-actions">
+                    <span id="problem-test-count" class="badge-subtle"><i class="fa-solid fa-vial"></i> 5 Tests</span>
+                    <button id="btn-toggle-problem-pane" class="btn-icon" title="Collapse Problem Pane">
+                        <i class="fa-solid fa-angles-left"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="problem-content" id="problem-content">
+                <!-- Problem Statement Description -->
+                <div class="problem-section">
+                    <div id="problem-description" class="problem-description-text">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
+                <!-- Examples Section -->
+                <div class="problem-section">
+                    <h3 class="section-heading"><i class="fa-solid fa-code"></i> Examples</h3>
+                    <div id="problem-examples" class="examples-container">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
+                <!-- Constraints Section -->
+                <div class="problem-section">
+                    <h3 class="section-heading"><i class="fa-solid fa-circle-exclamation"></i> Constraints</h3>
+                    <ul id="problem-constraints" class="constraints-list">
+                        <!-- Populated by JS -->
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Vertical Resizer Handle between Problem Pane & Coding Area -->
+        <div class="pane-resizer-v" id="pane-resizer-v"></div>
+
+        <!-- 2. RIGHT PANE: Code Editor + Testcase & Results Console -->
+        <section class="coding-area" id="coding-area">
+            <!-- 2A. Monaco Code Editor Section -->
+            <div class="editor-pane" id="editor-pane">
+                <div class="pane-header">
+                    <div class="file-tab active">
+                        <i id="file-tab-icon" class="fa-brands fa-java file-icon"></i>
+                        <span id="active-filename">Solution.java</span>
+                    </div>
+
+                    <div class="editor-actions">
+                        <button id="btn-copy-code" class="btn-icon" title="Copy Code to Clipboard">
+                            <i class="fa-regular fa-copy"></i>
+                        </button>
+                        <button id="btn-download-code" class="btn-icon" title="Download Source File">
+                            <i class="fa-solid fa-download"></i>
+                        </button>
+                        <button id="btn-format" class="btn-icon" title="Format Code">
+                            <i class="fa-solid fa-indent"></i>
+                        </button>
+                        <button id="btn-fullscreen-editor" class="btn-icon" title="Toggle Fullscreen Editor (Esc to exit)">
+                            <i class="fa-solid fa-expand"></i>
+                        </button>
+                        <button id="btn-clear-code" class="btn-icon" title="Clear Code">
+                            <i class="fa-solid fa-eraser"></i>
+                        </button>
+                        <button id="btn-reset-code" class="btn-icon" title="Reset to Starter Code">
+                            <i class="fa-solid fa-rotate-left"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="editor-container-wrapper">
+                    <div id="monaco-editor"></div>
+                    <div id="editor-loader" class="editor-loader">
+                        <div class="spinner"></div>
+                        <span>Initializing Monaco Editor...</span>
+                    </div>
+                </div>
+
+                <div class="editor-footer">
+                    <span><i class="fa-solid fa-shield-halved"></i> Sandboxed Environment</span>
+                    <span><i class="fa-regular fa-clock"></i> 5.0s Timeout</span>
+                    <span><i class="fa-solid fa-memory"></i> 64MB Memory Cap</span>
+                </div>
+            </div>
+
+            <!-- Horizontal Resizer Handle between Editor & Console -->
+            <div class="pane-resizer-h" id="pane-resizer-h"></div>
+
+            <!-- 2B. Bottom Testcase & Verdict Console -->
+            <div class="console-pane" id="console-pane">
+                <div class="eval-progress-bar" id="eval-progress-bar"></div>
+                <div class="pane-header console-header">
+                    <div class="console-tabs">
+                        <button id="tab-nav-testcase" class="console-tab-btn active">
+                            <i class="fa-regular fa-keyboard"></i> Testcase
+                        </button>
+                        <button id="tab-nav-result" class="console-tab-btn">
+                            <i class="fa-solid fa-square-poll-vertical"></i> Test Result
+                        </button>
+                        <button id="tab-nav-submissions" class="console-tab-btn">
+                            <i class="fa-solid fa-clock-rotate-left"></i> Submissions
+                        </button>
+                        <button id="tab-nav-terminal" class="console-tab-btn">
+                            <i class="fa-solid fa-terminal"></i> Terminal Output
+                        </button>
+                    </div>
+
+                    <div class="console-status-group">
+                        <div id="status-pill" class="status-pill ready">
+                            <span class="status-pill-dot"></span>
+                            <span id="status-pill-text">Ready</span>
+                        </div>
+                        <button id="btn-clear-console" class="btn-icon" title="Clear Console">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Console Tab Panel 1: Testcase Input -->
+                <div id="panel-testcase" class="console-tab-panel active">
+                    <div class="case-tabs-bar" id="case-tabs-bar">
+                        <!-- Populated by JS: Case 1, Case 2, Case 3, + Custom Input -->
+                    </div>
+                    <div class="testcase-body">
+                        <div class="testcase-input-header">
+                            <span class="field-label">Standard Input (stdin):</span>
+                            <span id="custom-input-hint" class="hint-label hidden">Custom input</span>
+                        </div>
+                        <textarea id="testcase-input-editor" class="testcase-input-box" placeholder="Enter input here..." spellcheck="false"></textarea>
+                    </div>
+                </div>
+
+                <!-- Console Tab Panel 2: Test Result & Verdict -->
+                <div id="panel-result" class="console-tab-panel">
+                    <div class="result-placeholder" id="result-placeholder">
+                        <i class="fa-solid fa-terminal placeholder-icon"></i>
+                        <p>Click <strong class="term-highlight">Run</strong> to execute sample test cases or <strong class="term-highlight">Submit</strong> for full evaluation suite.</p>
+                    </div>
+
+                    <!-- Verdict Banner -->
+                    <div id="verdict-banner" class="verdict-banner hidden">
+                        <div class="verdict-left">
+                            <span id="verdict-badge" class="verdict-tag success">ACCEPTED</span>
+                            <span id="verdict-runtime" class="verdict-meta"><i class="fa-regular fa-clock"></i> 0 ms</span>
+                            <span id="verdict-percentile" class="verdict-meta percentile-badge hidden"><i class="fa-solid fa-chart-simple"></i> Beats 0%</span>
+                            <span id="verdict-tests-count" class="verdict-meta"><i class="fa-solid fa-check-double"></i> 5/5 Passed</span>
+                        </div>
+                        <div class="verdict-right">
+                            <span id="verdict-summary-msg" class="verdict-msg">All tests passed successfully.</span>
+                        </div>
+                    </div>
+
+                    <!-- Compilation / Security Error Details Card -->
+                    <div id="compile-error-card" class="compile-error-card hidden">
+                        <div class="compile-error-header">
+                            <i id="compile-error-icon" class="fa-solid fa-triangle-exclamation"></i>
+                            <span id="compile-error-title">Compiler Diagnostics:</span>
+                        </div>
+                        <pre id="compile-error-text" class="compile-error-text"></pre>
+                    </div>
+
+                    <!-- Test Case Result Pills -->
+                    <div id="result-case-pills-bar" class="result-pills-bar hidden">
+                        <!-- Populated dynamically via SSE streaming -->
+                    </div>
+
+                    <!-- Active Test Case Detailed Diff View -->
+                    <div id="result-case-details" class="result-details-grid hidden">
+                        <div class="detail-box">
+                            <span class="detail-label">Input</span>
+                            <pre id="detail-input" class="detail-code"></pre>
+                        </div>
+                        <div class="detail-box">
+                            <span class="detail-label">Output</span>
+                            <pre id="detail-output" class="detail-code"></pre>
+                        </div>
+                        <div class="detail-box">
+                            <span class="detail-label">Expected</span>
+                            <pre id="detail-expected" class="detail-code"></pre>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Console Tab Panel 3: Submission History & Analytics -->
+                <div id="panel-submissions" class="console-tab-panel">
+                    <div class="submissions-header">
+                        <span class="section-heading"><i class="fa-solid fa-clock-rotate-left"></i> Submissions</span>
+                        <span id="submissions-count-badge" class="badge-subtle">0 Submissions</span>
+                    </div>
+                    <div id="submissions-list" class="submissions-list">
+                        <!-- Populated dynamically via /api/submissions/history -->
+                    </div>
+                </div>
+
+                <!-- Console Tab Panel 4: Terminal Output -->
+                <div id="panel-terminal" class="console-tab-panel">
+                    <!-- Banner for Playground execution summary -->
+                    <div id="exec-banner" class="exec-banner hidden">
+                        <div class="banner-left">
+                            <span id="banner-status-tag" class="banner-tag success">SUCCESS</span>
+                            <span id="banner-time" class="banner-meta"><i class="fa-regular fa-clock"></i> 0 ms</span>
+                            <span id="banner-exit" class="banner-meta"><i class="fa-solid fa-arrow-right-from-bracket"></i> Exit 0</span>
+                        </div>
+                        <div class="banner-right">
+                            <span id="banner-msg" class="banner-msg">Execution completed</span>
+                        </div>
+                    </div>
+
+                    <!-- Dark Terminal Screen -->
+                    <div class="terminal-screen" id="terminal-screen">
+                        <div class="terminal-welcome" id="terminal-welcome">
+                            <p class="term-dim">Sandbox Terminal (Java 21 &amp; C++ 20)</p>
+                            <p class="term-dim">Standard output and runtime diagnostics stream here.</p>
+                        </div>
+                        <pre id="term-stdout" class="term-stdout"></pre>
+                        <pre id="term-stderr" class="term-stderr hidden"></pre>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Monaco Editor from CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/loader.min.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
